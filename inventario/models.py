@@ -11,6 +11,9 @@ class Customer (models.Model):
     
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return f'/{self.code}/'
 
 class Product (models.Model):
     code = models.BigIntegerField(blank=False, null=False, verbose_name='Código')
@@ -28,6 +31,9 @@ class Product (models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return f'/{self.code}/'
+
 class Branch(models.Model):
     code = models.BigIntegerField(blank=False, null=False, verbose_name='Código')
     name = models.CharField(max_length=255, blank=False, null=False, verbose_name='Nombre')
@@ -40,11 +46,14 @@ class Branch(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return f'/{self.code}/'
 
 class Stock(models.Model):
     product = models.ForeignKey(Product, related_name='products', on_delete=models.CASCADE)
     customer = models.ForeignKey(Customer, related_name='customers', on_delete=models.CASCADE)
-    branch = models.ForeignKey(Branch, related_name='branchs', on_delete=models.CASCADE)
+    branch = models.ForeignKey(Branch, related_name='branches', on_delete=models.CASCADE)
     number_final = models.IntegerField(default=1, blank=False, null=False, verbose_name='Cantidad')
     date = models.DateField(blank=False, null=False, verbose_name='Fecha')
 
@@ -54,6 +63,9 @@ class Stock(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return f'/{self.customer.code}/{self.product.code}'
 
 class UploadFile(models.Model):
     customer = models.ForeignKey(Customer, related_name='file_customers', on_delete=models.CASCADE)
