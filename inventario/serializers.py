@@ -57,7 +57,7 @@ class StockSerializer(serializers.ModelSerializer):
         )
 
 class UploadFileSerializer(serializers.ModelSerializer):
-    customers = CustomerSerializer(many=True)
+    customer = CustomerSerializer(many=False)
     class Meta:
         model = UploadFile
         fields = (
@@ -68,5 +68,5 @@ class UploadFileSerializer(serializers.ModelSerializer):
             "date",
             "file_path",
             "get_absolute_url",
-            "customers",
+            "customer",
         )

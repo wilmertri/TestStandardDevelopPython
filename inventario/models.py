@@ -1,5 +1,8 @@
 from django.db import models
 
+def custom_upload_to(instance, filename):
+    return 'no_cargados/{0}/{1}'.format(instance.customer.code, filename)
+
 class Customer (models.Model):
     code = models.BigIntegerField(blank=False, null=False, verbose_name='Código')
     name = models.CharField(max_length=255, blank=False, null=False, verbose_name='Nombre')
@@ -62,7 +65,7 @@ class Stock(models.Model):
         verbose_name_plural = 'Inventarios'
 
     def __str__(self):
-        return self.name
+        return f'Cliente: {self.customer.code} Producto: {self.product.code} Cantidad: {self.number_final}'
     
     def get_absolute_url(self):
         return f'/{self.customer.code}/{self.product.code}'
@@ -73,7 +76,7 @@ class UploadFile(models.Model):
     count_registers = models.IntegerField(default=1, blank=False, null=False, verbose_name='Cantidad de registros')
     processsed = models.BooleanField(default=False, verbose_name='Carga procesada')
     date = models.DateField(blank=False, null=False, verbose_name='Fecha')
-    file_path = models.FileField(upload_to='uploads/', blank=True, null=True, verbose_name='Ruta de archivo')
+    file_path = models.FileField(upload_to=custom_upload_to, blank=True, null=True, verbose_name='Ruta de archivo')
 
     class Meta:
         verbose_name = 'Archivo cargado'
@@ -81,4 +84,7 @@ class UploadFile(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return f'/{self.customer.code}/{self.name}'
 
