@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-ov6qjdnz1q6r0p$&rdyy!#pxq%z-tqj#srigari$8gp&ax3f^w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['stock-azure-test.azurewebsites.net']
+ALLOWED_HOSTS = ['127.0.0.1','stock-azure-test.azurewebsites.net']
 
 
 # Application definition
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware'
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -80,11 +80,14 @@ WSGI_APPLICATION = 'stock.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dbstock', 
-        'USER': 'postgres', 
-        'PASSWORD': os.environ['POSTGRES_DATABASE'],
-        'HOST': '127.0.0.1', 
+        'NAME': 'stock', 
+        'USER': 'postgres@stock-azure-test-db', 
+        'PASSWORD': os.environ['POSTGRES_DATABASE_AZURE'],
+        'HOST': 'stock-azure-test-db.postgres.database.azure.com', 
         'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require'
+        }
     }
 }
 
