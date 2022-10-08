@@ -22,7 +22,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "in_stock",
-            "is_active"
+            "is_active",
             "sell_price",
             "buy_price",
             "get_absolute_url",
