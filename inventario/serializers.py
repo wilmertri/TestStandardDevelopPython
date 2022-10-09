@@ -41,9 +41,9 @@ class BranchSerializer(serializers.ModelSerializer):
         )
 
 class StockSerializer(serializers.ModelSerializer):
-    products = ProductSerializer(many=True)
-    customers = CustomerSerializer(many=True)
-    branches = BranchSerializer(many=True)
+    product = ProductSerializer(many=False)
+    customer = CustomerSerializer(many=False)
+    branche = BranchSerializer(many=False)
     class Meta:
         model = Stock
         fields = (
@@ -51,9 +51,9 @@ class StockSerializer(serializers.ModelSerializer):
             "number_final",
             "date",
             "get_absolute_url",
-            "products",
-            "customers",
-            "branches",
+            "product",
+            "customer",
+            "branche",
         )
 
 class UploadFileSerializer(serializers.ModelSerializer):

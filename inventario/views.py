@@ -1,14 +1,13 @@
-import os, shutil
+import os
 import pandas as pd
 from stock import settings
 from datetime import datetime, date
 from django.shortcuts import render
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from django.core.files.storage import FileSystemStorage
-from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
+from azure.storage.blob import BlobClient
+from drf_yasg.utils import swagger_auto_schema
 from django.http import Http404
 
 from .models import Customer, Product, Branch, Stock, UploadFile
@@ -16,17 +15,20 @@ from .serializers import CustomerSerializer, ProductSerializer, BranchSerializer
 
 
 class StockList(APIView):
+    @swagger_auto_schema(responses={200: StockSerializer(many=True)})
     def get(self, request, format=None):
         register_stocks = Stock.objects.all()
         serializer = StockSerializer(register_stocks, many=True)
         return Response(serializer.data)
 
 class ProductsList(APIView):
+    @swagger_auto_schema(responses={200: ProductSerializer(many=True)})
     def get(self, request, format=None):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(request_body=ProductSerializer)
     def post(self, request, format=None):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
@@ -34,7 +36,12 @@ class ProductsList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UploadFileForm(serializers.Serializer):
+    file_path = serializers.FileField()
+
 class UploadFileCreate(APIView):
+
+    @swagger_auto_schema(operation_description="Used only by loading a file with the six columns loaded in its order", request_body=UploadFileForm, responses={200: UploadFileSerializer(many=False)})
     def post(self, request):
         myfile = request.FILES['file_path']
         df = pd.read_csv(myfile)
@@ -58,7 +65,7 @@ class UploadFileCreate(APIView):
         loading_stock = StockLoading()
         loaded = loading_stock.loading_file(upload_file)
         self.update_file_path(loaded, upload_file, customer)
-        
+
         return Response(serializer.data)
 
     def update_file_path(self, loaded, upload_file, customer):
@@ -79,12 +86,13 @@ class UploadFileCreate(APIView):
             upload_file.save()
 
 class CustomerList(APIView):
-
+    @swagger_auto_schema(responses={200: CustomerSerializer(many=True)})
     def get(self, request, format=None):
         customers = Customer.objects.all()
         serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(request_body=CustomerSerializer)
     def post(self, request):
         if request.method == 'POST':
             serializer = CustomerSerializer(data=request.data)
@@ -95,11 +103,13 @@ class CustomerList(APIView):
 
 
 class BranchesList(APIView):
+    @swagger_auto_schema(responses={200: BranchSerializer(many=True)})
     def get(self, request, format=None):
         branches = Branch.objects.all()
         serializer = BranchSerializer(branches, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(request_body=BranchSerializer)
     def post(self, request, format=None):
         serializer = BranchSerializer(data=request.data)
         if serializer.is_valid():

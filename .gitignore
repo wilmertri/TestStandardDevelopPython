@@ -25,3 +25,4 @@ venv.bak/
 
 stock/__pycache__
 
+.vscode/
