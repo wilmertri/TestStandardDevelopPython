@@ -43,7 +43,7 @@ class BranchSerializer(serializers.ModelSerializer):
 class StockSerializer(serializers.ModelSerializer):
     product = ProductSerializer(many=False)
     customer = CustomerSerializer(many=False)
-    branche = BranchSerializer(many=False)
+    branch = BranchSerializer(many=False)
     class Meta:
         model = Stock
         fields = (
@@ -53,7 +53,7 @@ class StockSerializer(serializers.ModelSerializer):
             "get_absolute_url",
             "product",
             "customer",
-            "branche",
+            "branch",
         )
 
 class UploadFileSerializer(serializers.ModelSerializer):
