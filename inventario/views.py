@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.core.files.storage import FileSystemStorage
+from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
 from django.http import Http404
 
 from .models import Customer, Product, Branch, Stock, UploadFile
@@ -56,16 +57,26 @@ class UploadFileCreate(APIView):
         serializer = UploadFileSerializer(upload_file, many=False)
         loading_stock = StockLoading()
         loaded = loading_stock.loading_file(upload_file)
+        self.update_file_path(loaded, upload_file, customer)
+        
+        return Response(serializer.data)
+
+    def update_file_path(self, loaded, upload_file, customer):
         if loaded:
             filename = str(upload_file.name + '.csv')
-            old_path = upload_file.file_path.path
-            new_path = '{0}/cargados/{1}/'.format(settings.MEDIA_ROOT, customer.code)
-            if not os.path.exists(new_path):
-                os.makedirs(new_path)
-            shutil.move(old_path, new_path + filename)
+            old_path = settings.MEDIA_URL + str(upload_file.file_path)
+            new_path = 'cargados/{0}/'.format(customer.code) + filename
+            connect_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+            # Crea nuevo blob para el archivo ya cargado 
+            blob_client = BlobClient.from_connection_string(connect_str, container_name="media", blob_name=new_path)
+            blob_client.upload_blob(old_path)
+            # Elimina el blob del archivo de los no cargados
+            old_blob_client = BlobClient.from_connection_string(connect_str, container_name="media", blob_name=str(upload_file.file_path))
+            old_blob_client.delete_blob()
+            
+            upload_file.file_path = new_path
             upload_file.processsed = True
             upload_file.save()
-        return Response(serializer.data)
 
 class CustomerList(APIView):
 
@@ -100,7 +111,7 @@ class BranchesList(APIView):
 class StockLoading():
 
     def loading_file(self, upload_file):
-        file = upload_file.file_path.path
+        file = upload_file.file_path
         df = pd.read_csv(file)
         df.columns = ['Date', 'Customer', 'Branch', 'Product', 'FinalStock', 'UnitPrice']
 
